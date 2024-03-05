@@ -1,20 +1,81 @@
-from telethon.sync import TelegramClient
+import asyncio
+import random
+from telethon.sync import TelegramClient, errors
 
 api_id = '20631255'
 api_hash = 'c0ce0d24c3a6a653b1aaaad41df9928c'
+minDelay = 3
+maxDelay = 6
 
-# Create a Telethon client instance
-client = TelegramClient('tepy_session', api_id, api_hash)
-client.start()
 
-async def send_message_to_group(grpName, msg):
+### =====
+async def init_client(id, hash) -> TelegramClient:
+    client = TelegramClient('teleTool/tethonss', api_id, api_hash)
+    await client.start()
+    return client
+
+
+### =====
+async def send_message_to_group(client, grpName, msg, mediaPath = ''):
     # Get the group
-    group_entity = await client.get_input_entity(grpName)
+    try:
+        group_entity = await client.get_input_entity(grpName)
+    except Exception as e:
+        return str(e)
+        
+    msg = msg.replace('---', '\n')
 
-    # Send message to group
-    await client.send_message(group_entity, msg)
+    try:
+        if mediaPath:
+            await client.send_message(group_entity, message=msg, media=mediaPath)
+        else:
+            await client.send_message(group_entity, message=msg)
+    except errors.FloodWaitError as e:
+        await asyncio.sleep(e.seconds)
+        return f'Flood wait, sleeping for {e.seconds} seconds'
+    except Exception as e:
+        return str(e)
 
-# Run the send_message_to_group coroutine
-with client:
-    client.loop.run_until_complete(send_message_to_group('testnhom21', 'Hello from telethon!'))
-    print('============ Finish ============')
+
+# --------------- MAIN APP ---------------
+#'testnhom21\ntestnhom20'
+### =====
+async def main():
+
+    groupsStr = input("Nhập DS nhóm (tên nhóm cách nhau bằng dấu ---): ")
+    message = input("Nhập nội dung tin nhắn: ")
+    filePath = input("Nhập file đính kèm: ")
+
+    if not groupsStr:
+        print('Chưa nhập danh sách group spam.')
+        return        
+    
+    # Create a Telethon client instance
+    client = await init_client(api_id, api_hash)
+    if not client:
+        print('Cannot login Telegram.')
+
+    accPhone = (await client.get_me()).phone
+    listGrp = groupsStr.split('---')
+
+    while True:
+        for grpId in listGrp:
+            grpId = grpId.strip()
+            if 't.me' in grpId:
+                grpId = grpId[grpId.rindex('/') + 1:]
+
+            errMsg = await send_message_to_group(client, grpId, message, filePath)
+            if not errMsg:
+                print(f" ✔ '{accPhone}' gửi tin nhắn đến '{grpId}' thành công!")
+            else:
+                print(f" ✖ '{accPhone}' gửi tin nhắn đến '{grpId}' thất bại: {errMsg}")
+
+            # Delay between message sent
+            delay = random.uniform(minDelay, maxDelay)
+            await asyncio.sleep(delay)
+
+
+
+# Call the main function
+if __name__ == "__main__":
+    asyncio.run(main())  
