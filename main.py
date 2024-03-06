@@ -2,15 +2,16 @@ import asyncio
 import random
 from telethon.sync import TelegramClient, errors
 
-api_id = '20631255'
-api_hash = 'c0ce0d24c3a6a653b1aaaad41df9928c'
+#api_id = '20631255'
+#api_hash = 'c0ce0d24c3a6a653b1aaaad41df9928c'
+sessionFilePath = 'teleTool/tethonss'
 minDelay = 3
 maxDelay = 6
 
 
 ### =====
 async def init_client(id, hash) -> TelegramClient:
-    client = TelegramClient('teleTool/tethonss', api_id, api_hash)
+    client = TelegramClient(sessionFilePath, id, hash)
     await client.start()
     return client
 
@@ -41,14 +42,15 @@ async def send_message_to_group(client, grpName, msg, mediaPath = ''):
 #'testnhom21\ntestnhom20'
 ### =====
 async def main():
-
+    api_id = input("Nhập API ID: ")
+    api_hash = input("Nhập API HASH: ")
     groupsStr = input("Nhập DS nhóm (tên nhóm cách nhau bằng dấu ---): ")
     message = input("Nhập nội dung tin nhắn: ")
     filePath = input("Nhập file đính kèm: ")
 
     if not groupsStr:
         print('Chưa nhập danh sách group spam.')
-        return        
+        return
     
     # Create a Telethon client instance
     client = await init_client(api_id, api_hash)
