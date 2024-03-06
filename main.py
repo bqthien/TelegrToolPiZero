@@ -2,8 +2,6 @@ import asyncio
 import random
 from telethon.sync import TelegramClient, errors
 
-#api_id = '20631255'
-#api_hash = 'c0ce0d24c3a6a653b1aaaad41df9928c'
 sessionFilePath = 'teleTool/tethonss'
 minDelay = 3
 maxDelay = 6
